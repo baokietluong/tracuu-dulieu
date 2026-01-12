@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Tra cứu dữ liệu</title>
+  <meta charset="UTF-8">
+  <title>Trang tra cứu dữ liệu</title>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 40px;
-}
-h2 {
-  margin-bottom: 10px;
-}
-input {
-  padding: 8px;
-  width: 300px;
-  margin-bottom: 15px;
-}
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
-}
-th {
-  background-color: #f2f2f2;
-}
-</style>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    input {
+      width: 300px;
+      padding: 8px;
+      margin-bottom: 15px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 
 <body>
@@ -46,25 +46,36 @@ th {
 <table id="dataTable"></table>
 
 <script>
-/* ===== THÔNG TIN GOOGLE SHEETS ===== */
-const SHEET_ID = "16AtA5daIKPlcjDUtnR20ndh6UhQlOdhx";
-const SHEET_NAME = "Sheet1";   // TÊN TAB (đúng tuyệt đối)
+/* ===== LINK CSV GOOGLE SHEETS ===== */
+/* File của bạn */
+const CSV_URL =
+  "https://docs.google.com/spreadsheets/d/16AtA5daIKPlcjDUtnR20ndh6UhQlOdhx/export?format=csv&gid=111585543";
 
-/* ===== KHÔNG SỬA PHẦN DƯỚI ===== */
-const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
 let originalData = [];
 
-fetch(url)
-  .then(res => res.json())
-  .then(data => {
-    originalData = data;
-    renderTable(data);
+/* ===== TẢI DỮ LIỆU ===== */
+fetch(CSV_URL)
+  .then(response => response.text())
+  .then(text => {
+    const rows = text.trim().split("\n").map(r => r.split(","));
+    const headers = rows.shift();
+
+    originalData = rows.map(row => {
+      let obj = {};
+      headers.forEach((h, i) => {
+        obj[h] = row[i] || "";
+      });
+      return obj;
+    });
+
+    renderTable(originalData);
   })
   .catch(() => {
     document.getElementById("dataTable").innerHTML =
       "<tr><td>Không tải được dữ liệu</td></tr>";
   });
 
+/* ===== HIỂN THỊ BẢNG ===== */
 function renderTable(data) {
   const table = document.getElementById("dataTable");
   table.innerHTML = "";
@@ -83,7 +94,7 @@ function renderTable(data) {
   });
   table.appendChild(headerRow);
 
-  // Body
+  // Dữ liệu
   data.forEach(row => {
     const tr = document.createElement("tr");
     Object.values(row).forEach(value => {
@@ -95,6 +106,7 @@ function renderTable(data) {
   });
 }
 
+/* ===== TÌM KIẾM ===== */
 function filterTable() {
   const keyword = document
     .getElementById("searchInput")
