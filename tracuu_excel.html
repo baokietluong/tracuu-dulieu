@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Tra cứu dữ liệu chung</title>
+
+<style>
+body { font-family: Arial; margin: 40px; }
+input { padding: 8px; width: 300px; margin-bottom: 10px; }
+table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+th, td { border: 1px solid #ccc; padding: 8px; }
+th { background: #f2f2f2; }
+</style>
+</head>
+
+<body>
+
+<h2>Tra cứu dữ liệu</h2>
+<input type="text" id="search" placeholder="Nhập từ khóa..." onkeyup="filterTable()">
+
+<table id="table"></table>
+
+<script>
+const SHEET_ID = "16AtA5daIKPlcjDUtnR20ndh6UhQlOdhx";
+const SHEET_NAME = "Sheet1";   // đổi nếu tên sheet khác
+
+const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+let data = [];
+
+fetch(url)
+  .then(res => res.json())
+  .then(json => {
+    data = json;
+    renderTable(data);
+  });
+
+function renderTable(rows) {
+  const table = document.getElementById("table");
+  table.innerHTML = "";
+
+  if (rows.length === 0) return;
+
+  // header
+  const header = document.createElement("tr");
+  Object.keys(rows[0]).forEach(key => {
+    const th = document.createElement("th");
+    th.textContent = key;
+    header.appendChild(th);
+  });
+  table.appendChild(header);
+
+  // rows
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    Object.values(row).forEach(val => {
+      const td = document.createElement("td");
+      td.textContent = val;
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+}
+
+function filterTable() {
+  const key = document.getElementById("search").value.toLowerCase();
+  const filtered = data.filter(row =>
+    Object.values(row).some(v =>
+      String(v).toLowerCase().includes(key)
+    )
+  );
+  renderTable(filtered);
+}
+</script>
+
+</body>
+</html>
